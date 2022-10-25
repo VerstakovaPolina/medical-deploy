@@ -36,21 +36,24 @@ services:
       - "8081:8080"
 
   medical-monitoring:
+    restart: always
     image: application/medical-monitoring:simple
     depends_on:
       message-analyzer:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 20s
+      interval: 60s
       timeout: 10s
-      retries: 3
+      start_period: 20s
+      retries: 5
     environment:
       SERVER_PORT: 8080
     ports:
       - "8082:8080"
 
   person-service:
+    restart: always
     image: application/person-service:simple
     depends_on:
       message-analyzer:
@@ -59,9 +62,10 @@ services:
         condition: service_healthy
     healthcheck:
        test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-       interval: 20s
+       interval: 60s
        timeout: 10s
-       retries: 3
+       start_period: 20s
+       retries: 5
     environment:
       SERVER_PORT: 8080
     ports:
