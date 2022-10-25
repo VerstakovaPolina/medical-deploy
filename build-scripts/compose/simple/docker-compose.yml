@@ -3,29 +3,33 @@ version: '2.4'
 services:
 
   rabbitmq:
+    restart: always
     image: rabbitmq:3.10-management
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       interval: 30s
       timeout: 30s
       retries: 3
-    environment:
-      SERVER_PORT: 8080
+    volumes:
+      - ~/docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/docker-conf/rabbitmq/log/:/var/log/rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
 
 
   message-analyzer:
+    restart: always
     image: application/message-analyzer:simple
     depends_on:
       rabbitmq:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 20s
+      interval: 60s
       timeout: 10s
-      retries: 3
+      start_period: 20s
+      retries: 5
     environment:
       SERVER_PORT: 8080
     ports:
